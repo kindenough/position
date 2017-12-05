@@ -119,12 +119,15 @@ public class PollingService extends Service {
 	 */
 	private void getLocation() {
 		// 初始化client
-		locationClient = new AMapLocationClient(this.getApplicationContext());
-		locationOption = getDefaultOption();
-		// 设置定位参数
-		locationClient.setLocationOption(locationOption);
-		// 设置定位监听
-		locationClient.setLocationListener(locationListener);
+		if(locationClient==null)
+		{
+			locationClient = new AMapLocationClient(this.getApplicationContext());
+			locationOption = getDefaultOption();
+			// 设置定位参数
+			locationClient.setLocationOption(locationOption);
+			// 设置定位监听
+			locationClient.setLocationListener(locationListener);
+		}
 		locationClient.startLocation();
 	}
 
