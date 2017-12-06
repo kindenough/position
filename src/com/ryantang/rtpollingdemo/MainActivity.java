@@ -99,6 +99,8 @@ public class MainActivity extends Activity {
 
 		//getLocation();
 
+		//Òþ²Ø´°¿Ú
+		//moveTaskToBack(true);  
 	}
 
 	@Override

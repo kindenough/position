@@ -23,8 +23,11 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.telephony.TelephonyManager;
 /**
  * Polling service
@@ -42,6 +45,9 @@ public class PollingService extends Service {
 	private NotificationManager mManager;
 
 	String szImei;
+
+	PowerManager pm;
+	WakeLock wakeLock = null; //锁屏后继续运行，不起作用
 	
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -54,6 +60,8 @@ public class PollingService extends Service {
 
 		TelephonyManager TelephonyMgr = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 		szImei = TelephonyMgr.getDeviceId();// 唯一标识码
+		
+		acquireWakeLock();
 	}
 	
 	@Override
@@ -107,6 +115,7 @@ public class PollingService extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 		System.out.println("Service:onDestroy");
+		releaseWakeLock();
 	}
 	
 
@@ -306,4 +315,29 @@ public class PollingService extends Service {
 		}
 	};
 
+	//获取电源锁，保持该服务在屏幕熄灭时仍然获取CPU时，保持运行  
+    private void acquireWakeLock()  
+    {  
+        if (null == wakeLock)  
+        {  
+            pm = (PowerManager)this.getSystemService(Context.POWER_SERVICE);  
+//            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK|PowerManager.ON_AFTER_RELEASE, "PostLocationService");
+            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK|PowerManager.ON_AFTER_RELEASE, getClass().getCanonicalName());
+            
+            if (null != wakeLock)  
+            {  
+                wakeLock.acquire();  
+            }  
+        }  
+    }  
+      
+    //释放设备电源锁  
+    private void releaseWakeLock()  
+    {  
+        if (null != wakeLock)  
+        {  
+            wakeLock.release();  
+            wakeLock = null;  
+        }  
+    } 
 }
